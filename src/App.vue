@@ -2,7 +2,7 @@
   <div id="app">
     <todos-header/>
     <todos-input @addEvent="handleAdd"  @allSelect="handleSelect"/>
-    <div v-for="(item,index) in filterThings">
+    <div v-for="(item,index) in filterThings" :key="item">
       <todos-item :todos="item" :num="index" @handleRemove="handleDelete"></todos-item>
     </div>
     <todos-tab v-show="this.things.length"  :items="things" @replace="handleReplace" @itemChange="handleChange"/>
