@@ -37,6 +37,7 @@ props:{
 },
 //监听属性 类似于data概念
 computed: {
+    // 剩余多少项未完成
     remaining(){
         return this.todos.filter( element => !element.completed ).length;
     }
@@ -45,10 +46,12 @@ computed: {
 watch: {},
 //方法集合
 methods: {
+    // 切换tab选项，查看所有、未完成、已完成事项
    tabChange(index){
        this.currentIndex = index;
        this.$emit('tabChange',this.tabArr[index])
    },
+    // 删除所有已完成的事项
    removeCompleted(){
        this.$emit('removeCompleted')
    }

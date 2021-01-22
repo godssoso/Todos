@@ -2,7 +2,7 @@
   <div id="app">
     <todos-header></todos-header>
     <todos-input @release="handleRelease" @selectAll="handleSelectAll" :todos="todos"></todos-input>
-    <todos-item :todos="todos" :tabTxt="tabTxt" @deleteItem="handleDelete" @storageUpdate="handleUpdate"></todos-item>
+    <todos-item :todos="todos" :tabTxt="tabTxt" @deleteItem="handleDelete" @storageUpdate="handleUpdate" @reedit="handleReedit"></todos-item>
     <todos-tab :todos="todos" v-if="todos.length" @tabChange="handleTabChange" @removeCompleted="handleRemoveCompleted"></todos-tab>
   </div>
 </template>
@@ -26,6 +26,7 @@ export default {
     
   },
   methods:{
+    //发布新事项
     handleRelease(text){
       this.num++;
       const obj = {
@@ -47,6 +48,7 @@ export default {
         localStorage.setItem('myTodos',JSON.stringify([obj]));
       }
     },
+    //删除某项
     handleDelete(id){
       // 利用id找出这一项在原数组中对应的index，然后进行删除
       const index = this.todos.findIndex(element => element.id == id);
@@ -60,9 +62,11 @@ export default {
       //然后更新local storage
       localStorage.setItem('myTodos',JSON.stringify(this.todos));
     },
+    //切换tab栏,查看 所有、未完成、已完成
     handleTabChange(tab){
       this.tabTxt = tab;
     },
+    //删除已完成
     handleRemoveCompleted(){
       this.todos = this.todos.filter( element => !element.completed );
       //每次删除一项数据，就重新更新item中的id
@@ -72,6 +76,7 @@ export default {
        //然后更新local storage
       localStorage.setItem('myTodos',JSON.stringify(this.todos));
     },
+    //全选
     handleSelectAll(){
       const length = this.todos.filter( e => !e.completed).length;
       if(length){
@@ -84,6 +89,7 @@ export default {
         localStorage.setItem('myTodos',JSON.stringify(this.todos));
       }
     },
+    //点击复选框时更新本地存储状态
     handleUpdate(id){
        //然后更新local storage
       //  console.log(111);
@@ -96,6 +102,10 @@ export default {
           }
         }
         localStorage.setItem('myTodos',JSON.stringify(beforeArr));
+    },
+    //重新编辑
+    handleReedit(){
+      localStorage.setItem('myTodos',JSON.stringify(this.todos));
     }
     
   },

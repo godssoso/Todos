@@ -42,6 +42,7 @@ methods: {
            this.val = '';
        }
    },
+    //全选事件
    selectAll(){
        this.$emit('selectAll')
    }
