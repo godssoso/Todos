@@ -87,6 +87,7 @@ export default {
     handleUpdate(id){
        //然后更新local storage
       //  console.log(111);
+      //因为在点击复选框时，它先触发自定义事件，然后再改变自身的状态，所以在这里我们拿到点击的那一项，直接对它的completed值进行取反，算是提前改变了
         const index = this.todos.findIndex(element => element.id == id);
         const beforeArr =  JSON.parse(localStorage.getItem('myTodos'));
         for(let i=0;i<beforeArr.length;i++){
@@ -99,11 +100,15 @@ export default {
     
   },
   created(){
-    // console.log(111);
+    // 每次重新打开页面的时候就读取本地存储，然后更新todos数据
+    //由于每次重新打开，this.num为0，如果之前有数据，那么再添加事项会造成id重复的情况
+    //所以在读取更新todos的时候，也要更新this.num
     let myTodos = localStorage.getItem('myTodos');
     // console.log(myTodos);
     if(myTodos){
       this.todos = JSON.parse(myTodos);
+      // console.log(this.todos[this.todos.length - 1].id);
+      this.num = this.todos[this.todos.length - 1].id;  //更新用于记录id的num,避免id重复的情况
     }else{
       return;
     }
