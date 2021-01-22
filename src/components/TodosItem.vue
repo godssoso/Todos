@@ -1,12 +1,15 @@
 <!-- todos的具体项 -->
 <template>
-<div class='todo-items'>
-    <div class="item-left">
-        <!-- checkbox类input标签用v-model指令绑定状态 -->
-        <input type="checkbox" name="" id="" @click="handleClick(todos)" v-model="todos.completed">
+<div>
+    <div class='todo-items' v-for="(item) in showTodos" :key="item.id">
+        <div class="item-left">
+            <!-- checkbox类input标签用v-model指令绑定状态 -->
+            <input type="checkbox" v-model="item.completed" name="" id="" @click="storageUpdate(item.id)">
+        </div>
+        <div :class="['item-title',{done:item.completed}]"><span>{{ item.title }}</span></div>
+        <!-- 删除项不能直接传index进行删除，因为此时的index是在过滤属性中的index，而非原数组中的index,所以要传入一个不变项id -->
+        <div class="item-right" @click="deleteItem(item.id)">X</div>
     </div>
-    <div class="item-title"><span :class="{done:todos.completed}">{{ todos.title }}</span></div>
-    <div class="item-right" @click="remove(num)">×</div>
 </div>
 </template>
 
@@ -19,12 +22,14 @@ export default {
 components: {},
 props:{
    todos:{
-        type:Object,
-        default:[]
+       type:Array,
+       default:function(){
+           return []
+       }
    },
-   num:{
-       type:Number,
-        default:0
+   tabTxt:{
+       type:String,
+       default:'All'
    }
 },
 data() {
@@ -34,19 +39,27 @@ return {
 };
 },
 //监听属性 类似于data概念
-computed: {},
+computed: {
+    showTodos(){
+        if(this.tabTxt === "All"){
+            return this.todos
+        }else if(this.tabTxt === "Active"){
+            return this.todos.filter( element => !element.completed)
+        }else{
+            return this.todos.filter( element => element.completed)
+        }
+    }
+},
 //监控data中的数据变化
 watch: {},
 //方法集合
 methods: {
-    handleClick(todos){
-        todos.completed = !todos.completed;
-        console.log(todos.completed);
-    },
-    remove(num){
-        // console.log(num);
-        this.$emit('handleRemove',num);
-    }
+   deleteItem(id){
+       this.$emit('deleteItem',id)
+   },
+   storageUpdate(id){
+      this.$emit('storageUpdate',id);
+   }
 },
 //生命周期 - 创建完成（可以访问当前this实例）
 created() {
@@ -80,6 +93,9 @@ activated() {}, //如果页面有keep-alive缓存功能，这个函数会触发
    }
    .item-left input{
        cursor: pointer;
+   }
+   .item-title{
+       width: 430px
    }
    .item-right{
        cursor: pointer;

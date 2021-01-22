@@ -5,9 +5,9 @@
         {{remaining}} item left
     </div>
     <div class="tab-center">
-        <span v-for="(item,index) in textArr" :class="{active:index==currentIndex}" @click="toggleClick(index)">{{ item }}</span>
+        <span v-for="(item,index) in tabArr" :key="item" :class="{active:index===currentIndex}" @click="tabChange(index)">{{ item }}</span>
     </div>
-    <div class="tab-right" @click="replace">
+    <div :class="['tab-right',{hidden:!todos.filter(e => e.completed).length}]" @click="removeCompleted">
         Clear completed
     </div>
 </div>
@@ -23,33 +23,35 @@ components: {},
 data() {
 //这里存放数据
 return {
-    textArr:['All','Active','Completed'],
-    currentIndex:0,
+    tabArr:['All','Active','Completed'],
+    currentIndex:0
 };
 },
 props:{
-    items:{
+    todos:{
         type:Array,
-        default:[]
+        default:function(){
+            return []
+        }
     }
 },
 //监听属性 类似于data概念
 computed: {
     remaining(){
-        return this.items.filter(item => !item.completed).length;
+        return this.todos.filter( element => !element.completed ).length;
     }
 },
 //监控data中的数据变化
 watch: {},
 //方法集合
 methods: {
-    toggleClick(index){
-        this.currentIndex = index;
-        this.$emit('itemChange',this.textArr[index]);
-    },
-    replace(){
-        this.$emit('replace');
-    }
+   tabChange(index){
+       this.currentIndex = index;
+       this.$emit('tabChange',this.tabArr[index])
+   },
+   removeCompleted(){
+       this.$emit('removeCompleted')
+   }
 },
 //生命周期 - 创建完成（可以访问当前this实例）
 created() {
@@ -95,5 +97,8 @@ activated() {}, //如果页面有keep-alive缓存功能，这个函数会触发
     .active{
         /* border: 1px solid rgba(175, 47, 47, 0.2); */
         border-color: rgba(175, 47, 47, 0.2)!important;
+    }
+    .hidden{
+        visibility: hidden;
     }
 </style>

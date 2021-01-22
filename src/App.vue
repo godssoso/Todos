@@ -1,11 +1,9 @@
 <template>
   <div id="app">
-    <todos-header/>
-    <todos-input @addEvent="handleAdd"  @allSelect="handleSelect"/>
-    <div v-for="(item,index) in filterThings" :key="item">
-      <todos-item :todos="item" :num="index" @handleRemove="handleDelete"></todos-item>
-    </div>
-    <todos-tab v-show="this.things.length"  :items="things" @replace="handleReplace" @itemChange="handleChange"/>
+    <todos-header></todos-header>
+    <todos-input @release="handleRelease" @selectAll="handleSelectAll" :todos="todos"></todos-input>
+    <todos-item :todos="todos" :tabTxt="tabTxt" @deleteItem="handleDelete" @storageUpdate="handleUpdate"></todos-item>
+    <todos-tab :todos="todos" v-if="todos.length" @tabChange="handleTabChange" @removeCompleted="handleRemoveCompleted"></todos-tab>
   </div>
 </template>
 
@@ -14,6 +12,7 @@ import TodosHeader from "./components/Header.vue";
 import TodosInput from "@/components/TodosInput.vue";
 import TodosItem from "./components/TodosItem.vue";
 import TodosTab from "./components/TodosTab.vue";
+
 
 export default {
   name: 'App',
@@ -24,58 +23,96 @@ export default {
     TodosTab
   },
   computed:{
-    filterThings(){
-      if(this.actived == "All"){
-        return this.things;
-      }else if(this.actived == "Active"){
-        return this.things.filter(item => !item.completed);
-      }else{
-        return this.things.filter(item => item.completed);
-      }
-    }
+    
   },
   methods:{
-    handleAdd(value){
-      this.count++;
+    handleRelease(text){
+      this.num++;
       const obj = {
-        id: this.count,
-        title: value,
-        completed: false
+        id:this.num,
+        title:text,
+        completed:false
       }
-      this.things.push(obj);
-    },
-    handleDelete(num){
-      // console.log(num);
-      this.things.splice(num,1);
-      for(let i = 0;i<this.things.length;i++){
-        this.things[i].id = i + 1;
+      this.todos.push(obj);
+      // console.log([obj]);
+      // local storage 中只能存储字符串，所以要先转字符串
+      let myTodos = localStorage.getItem('myTodos');
+      // console.log(myTodos);
+      if(myTodos){
+        let todosArr = JSON.parse(myTodos);
+        todosArr.push(obj)
+        // console.log(JSON.parse(myTodos));
+        localStorage.setItem('myTodos',JSON.stringify(todosArr));
+      }else{
+        localStorage.setItem('myTodos',JSON.stringify([obj]));
       }
-      this.count--;
     },
-    handleReplace(){
-      this.things = this.things.filter( item => !item.completed);
+    handleDelete(id){
+      // 利用id找出这一项在原数组中对应的index，然后进行删除
+      const index = this.todos.findIndex(element => element.id == id);
+      // console.log(index);
+      this.todos.splice(index,1);
+      this.num--;
+      //每次删除一项数据，就重新更新item中的id
+      for(let i=0;i<this.todos.length;i++){
+        this.todos[i].id = i+1;
+      }
+      //然后更新local storage
+      localStorage.setItem('myTodos',JSON.stringify(this.todos));
     },
-    handleChange(text){
-      // console.log(111);
-      this.actived = text;
+    handleTabChange(tab){
+      this.tabTxt = tab;
     },
-    handleSelect(flag){
-      this.things.forEach(element => {
-          element.completed = flag;
-      });
+    handleRemoveCompleted(){
+      this.todos = this.todos.filter( element => !element.completed );
+      //每次删除一项数据，就重新更新item中的id
+      for(let i=0;i<this.todos.length;i++){
+        this.todos[i].id = i+1;
+      }
+       //然后更新local storage
+      localStorage.setItem('myTodos',JSON.stringify(this.todos));
+    },
+    handleSelectAll(){
+      const length = this.todos.filter( e => !e.completed).length;
+      if(length){
+        this.todos.forEach( e => e.completed = true);
+         //然后更新local storage
+        localStorage.setItem('myTodos',JSON.stringify(this.todos));
+      }else{
+        this.todos.forEach( e => e.completed = false);
+         //然后更新local storage
+        localStorage.setItem('myTodos',JSON.stringify(this.todos));
+      }
+    },
+    handleUpdate(id){
+       //然后更新local storage
+      //  console.log(111);
+        const index = this.todos.findIndex(element => element.id == id);
+        const beforeArr =  JSON.parse(localStorage.getItem('myTodos'));
+        for(let i=0;i<beforeArr.length;i++){
+          if(i == index){
+            beforeArr[i].completed = !beforeArr[i].completed;
+          }
+        }
+        localStorage.setItem('myTodos',JSON.stringify(beforeArr));
+    }
+    
+  },
+  created(){
+    // console.log(111);
+    let myTodos = localStorage.getItem('myTodos');
+    // console.log(myTodos);
+    if(myTodos){
+      this.todos = JSON.parse(myTodos);
+    }else{
+      return;
     }
   },
   data(){
     return {
-      things:[
-        // {
-        //   id:5,
-        //   title:'搬砖',
-        //   completed:false
-        // }
-      ],
-      count:0,
-      actived:'All'
+      todos:[],
+      num:0,
+      tabTxt:'All'
     }
   }
 }

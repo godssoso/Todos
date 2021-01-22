@@ -1,9 +1,10 @@
 <!-- todos的输入框部分 -->
 <template>
 <div class='inp'>
-    <input type="text" placeholder="What need to be done?" class="new-todo" @keyup.enter="addTodos">
+    <!-- 监听回车键，发布代做事项 -->
+    <input type="text" placeholder="What need to be done?" v-model="val" class="new-todo" @keyup.enter="release">
     <div class="toggle-all"></div>
-    <label for="toggle-all" @click="selectAll" :class="{show:isshow}"></label>
+    <label for="toggle-all" @click="selectAll" :class="{show:!todos.filter(e => !e.completed).length}" v-if="todos.length"></label>
 </div>
 </template>
 
@@ -14,10 +15,18 @@
 export default {
 //import引入的组件需要注入到对象中才能使用
 components: {},
+props:{
+    todos:{
+        type:Array,
+        default:function(){
+            return []
+        }
+    }
+},
 data() {
 //这里存放数据
 return {
-    isshow:false
+    val:''
 };
 },
 //监听属性 类似于data概念
@@ -26,17 +35,16 @@ computed: {},
 watch: {},
 //方法集合
 methods: {
-    addTodos(e){
-        // console.log(e.target.value);
-        if(e.target.value){
-            this.$emit('addEvent',e.target.value);
-            e.target.value = '';
-        }
-    },
-    selectAll(){
-        this.isshow = !this.isshow;
-        this.$emit('allSelect',this.isshow);
-    }
+   release(){
+       if(this.val){
+           //先发布事件，将数据传给父组件，再将输入框清空
+           this.$emit('release',this.val); 
+           this.val = '';
+       }
+   },
+   selectAll(){
+       this.$emit('selectAll')
+   }
 },
 //生命周期 - 创建完成（可以访问当前this实例）
 created() {
